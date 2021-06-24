@@ -1,0 +1,3 @@
+bindings to python youtube-dl library, avoid invoking it as a program at all costs
+
+configuration for scotty and redis

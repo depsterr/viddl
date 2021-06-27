@@ -1,3 +1,13 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
+
+module Templates.Index (indexPage) where
+
+import qualified Data.Text.Lazy as TL
+import Text.RawString.QQ
+
+indexPage :: TL.Text
+indexPage = [r|
 <!DOCTYPE html>
 <head>
 	<meta cherset="UTF-8">
@@ -32,6 +42,7 @@
 					<h2>Audio only download</h2>
 					<form method="post" action="/">
 						<input required name="url" type="text" placeholder="Enter url here"><br>
+						<input type="hidden" name="resolution" value="audio">
 						<input type="submit" value="Download">
 					</form>
 				</td>
@@ -41,3 +52,4 @@
 		<p>viddl is free <a href="https://github.com/depsterr/viddl">open source</a> software and is powered by <a href="https://yt-dl.org/">youtube-dl</a>.</p>
 	</center>
 </body>
+|]

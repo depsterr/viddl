@@ -1,3 +1,5 @@
 bindings to python youtube-dl library, avoid invoking it as a program at all costs
 
-configuration for scotty and redis
+configuration for scotty and redis, and some variables in the program
+
+maybe add some basic editing functionality eventually (ffmpeg?)

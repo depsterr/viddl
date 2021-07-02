@@ -26,7 +26,6 @@ indexPage = [r|
 						<input required name="url" type="text" placeholder="Enter url here"><br>
 						<label for="resolution">res</label>
 						<select required name="resolution">
-							<option value="min">Smallest Possible</option>
 							<option value="144p">144p</option>
 							<option value="240p">240p</option>
 							<option value="360p">360p</option>

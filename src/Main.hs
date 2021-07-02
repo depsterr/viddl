@@ -5,24 +5,13 @@ module Main where
 import Templates.Index
 import Templates.Loading
 import Templates.Error
+import YTDL
 
 import Control.Monad.IO.Class
 import qualified Database.Redis as R
 import qualified Data.Text.Lazy as TL
 import Web.Scotty
 import Network.URI (URI, parseURI)
-
-data Resolution
-  = P144
-  | P240
-  | P360
-  | P480
-  | P720
-  | P1080
-  | PMAX
-  | PMIN
-  | Audio
-  deriving (Eq, Show)
 
 getRes :: String -> Maybe Resolution
 getRes ("144p")  = Just P144
@@ -31,8 +20,7 @@ getRes ("360p")  = Just P360
 getRes ("480p")  = Just P480
 getRes ("720p")  = Just P720
 getRes ("1080p") = Just P1080
-getRes ("min")   = Just PMAX
-getRes ("max")   = Just PMIN
+getRes ("max")   = Just PMAX
 getRes ("audio") = Just Audio
 getRes ("max")   = Nothing
 
@@ -57,14 +45,6 @@ acceptingClients :: IO Bool
 acceptingClients = do
   clients <- getClients
   pure $ clients < maxClients
-
-downloadVideo :: String -> Resolution -> IO FilePath
-downloadVideo url res = do
-  undefined
-
-downloadAudio :: String -> IO FilePath
-downloadAudio url = do
-  undefined
 
 app :: R.Connection -> ScottyM ()
 app rConn = do

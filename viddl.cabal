@@ -12,12 +12,11 @@ maintainer:         depsterr@protonmail.com
 category:           Web
 build-type:         Simple
 
-executable viddl
-    main-is:          Main.hs
-    other-modules:    Templates.Index
+library
+    exposed-modules:  Templates.Index
                     , Templates.Loading
                     , Templates.Error
-    -- other-extensions:
+                    , YTDL
     ghc-options:      -Wall -O2
     build-depends:    base ^>=4.14.1.0
                     , scotty
@@ -27,5 +26,23 @@ executable viddl
                     , unix
                     , raw-strings-qq
                     , network-uri
+                    , directory
+                    , process
+    hs-source-dirs:   src
+    default-language: Haskell2010
+
+executable viddl
+    main-is:          Main.hs
+    ghc-options:      -Wall -O2
+    build-depends:    base ^>=4.14.1.0
+                    , scotty
+                    , hedis
+                    , transformers
+                    , text
+                    , unix
+                    , raw-strings-qq
+                    , network-uri
+                    , directory
+                    , process
     hs-source-dirs:   src
     default-language: Haskell2010

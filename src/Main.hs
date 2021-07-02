@@ -6,46 +6,15 @@ import Templates.Index
 import Templates.Loading
 import Templates.Error
 import YTDL
+import Clients
+import Helpers
 
 import Control.Monad.IO.Class
 import qualified Database.Redis as R
 import qualified Data.Text.Lazy as TL
 import Web.Scotty
-import Network.URI (URI, parseURI)
 
-getRes :: String -> Maybe Resolution
-getRes ("144p")  = Just P144
-getRes ("240p")  = Just P240
-getRes ("360p")  = Just P360
-getRes ("480p")  = Just P480
-getRes ("720p")  = Just P720
-getRes ("1080p") = Just P1080
-getRes ("max")   = Just PMAX
-getRes ("audio") = Just Audio
-getRes ("max")   = Nothing
-
-isRes :: TL.Text -> Bool
-isRes res = case getRes (TL.unpack res) of
-              (Just _) -> True
-              _        -> False
-
-isURL :: TL.Text -> Bool
-isURL uri = case parseURI (TL.unpack uri) of
-              (Just _) -> True
-              _        -> False
-
--- todo: config file
-maxClients :: Int
-maxClients = 100
-
-getClients :: IO Int
-getClients = undefined
-
-acceptingClients :: IO Bool
-acceptingClients = do
-  clients <- getClients
-  pure $ clients < maxClients
-
+-- todo ReaderT
 app :: R.Connection -> ScottyM ()
 app rConn = do
   get "/" $ do

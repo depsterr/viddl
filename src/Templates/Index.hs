@@ -18,7 +18,7 @@ indexPage = [r|
 	<center>
 		<h1>viddl</h1>
 		<p>Download videos from sources such as youtube, twitter, vimeo <a href="https://github.com/ytdl-org/youtube-dl/blob/master/docs/supportedsites.md">and more!</a></p>
-		<table>
+		<table cellspacing="25">
 			<tr>
 				<td valign="top">
 					<h2>Video download</h2>

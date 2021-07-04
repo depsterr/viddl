@@ -1,5 +1,8 @@
-module YTDL (downloadVideo, downloadAudio, Resolution(..), ytdl) where
+module YTDL (Resolution(..), ytdl) where
 
+import Control.Concurrent (forkIO, threadDelay)
+import Data.Digest.Pure.MD5
+import qualified Data.ByteString.Lazy.UTF8 as BCU
 import System.Directory
 import System.Exit
 import System.Process
@@ -30,38 +33,49 @@ resToArgs (P1080) = wrapResString "1080"
 resToArgs (PMAX)  = ["-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4"]
 resToArgs (Audio) = ["-x", "--audio-format", "mp3"]
 
-downloadVideo :: String -> String -> Resolution -> IO (Either String FilePath)
-downloadVideo client url res = ytdl client url res
-
-downloadAudio :: String -> String -> IO (Either String FilePath)
-downloadAudio client url = ytdl client url Audio
-
-ytdl :: String -> String -> Resolution -> IO (Either String FilePath)
-ytdl client url res = do
+ytdl :: String -> Resolution -> IO (Either String FilePath)
+ytdl url res = do
   let ext = case res of { Audio -> ".mp3"; _ -> ".mp4" }
+
+  let ident = show . md5 . BCU.fromString $ url <> show res
+
   -- todo: config for path
   tmpdir <- getTemporaryDirectory
-  let dir = concat [tmpdir, "/viddl/", client]
-  let fileName = concat [dir, "/", client, ext]
-  createDirectoryIfMissing True dir
+  let dir = concat [tmpdir, "/viddl/", ident]
+  let fileName = concat [dir, "/", ident, ext]
 
-  ytdlProc <- createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url]))
-    { std_out = CreatePipe
-    , std_err = CreatePipe }
+  -- todo: implement file locking for deleting and uploading file
+  processed <- doesFileExist fileName
+  if processed
+    then do
+      putStrLn $ "Returning existing ident " <> ident
+      pure (Right fileName)
+    else do
+      putStrLn $ "Processing new ident " <> ident
 
-  case ytdlProc of
-    (_, _, Just herr, ph) -> do
-      err <- hGetContents herr
-      exitCode <- waitForProcess ph
-      case exitCode of
-        ExitSuccess -> do
-          exists <- doesFileExist fileName
-          if exists
-            then pure (Right fileName)
-            else do 
-              removeDirectory dir
-              pure (Left "An unknown error prevented the output file from being created")
+      createDirectoryIfMissing True dir
 
-        (ExitFailure status) -> pure (Left (concat ["execution failed with status ", show status, ": ", err]))
+      ytdlProc <- createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url]))
+        { std_out = CreatePipe
+        , std_err = CreatePipe }
 
-    _ -> pure (Left "Unable to create ytdlProcess for downloading video")
+      case ytdlProc of
+        (_, _, Just herr, ph) -> do
+          err <- hGetContents herr
+          exitCode <- waitForProcess ph
+          case exitCode of
+            ExitSuccess -> do
+              exists <- doesFileExist fileName
+              if exists
+                then do
+                  -- wait 5 minutes and then delete the directory
+                  -- todo: implement file locking for deleting and uploading file
+                  _ <- forkIO $ threadDelay 300000000 >> removeDirectoryRecursive dir
+                  pure (Right fileName)
+                else do 
+                  removeDirectoryRecursive dir
+                  pure (Left "An unknown error prevented the output file from being created")
+
+            (ExitFailure status) -> pure (Left (concat ["execution failed with status ", show status, ": ", err]))
+
+        _ -> pure (Left "Unable to create ytdlProcess for downloading video")

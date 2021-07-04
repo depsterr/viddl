@@ -22,7 +22,7 @@ indexPage = [r|
 			<tr>
 				<td valign="top">
 					<h2>Video download</h2>
-					<form method="post" action="/">
+					<form method="get" action="/video.mp4">
 						<input required name="url" type="text" placeholder="Enter url here"><br>
 						<label for="resolution">res</label>
 						<select required name="resolution">
@@ -39,7 +39,7 @@ indexPage = [r|
 				</td>
 				<td valign="top">
 					<h2>Audio only download</h2>
-					<form method="post" action="/">
+					<form method="get" action="/audio.mp3">
 						<input required name="url" type="text" placeholder="Enter url here"><br>
 						<input type="hidden" name="resolution" value="audio">
 						<input type="submit" value="Download">

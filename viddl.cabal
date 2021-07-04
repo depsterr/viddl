@@ -14,32 +14,39 @@ build-type:         Simple
 
 library
     exposed-modules:  Templates.Index
-                    , Templates.Loading
                     , Templates.Error
                     , YTDL
-                    , Clients
                     , Helpers
     ghc-options:      -Wall -O2
     build-depends:    base ^>=4.14.1.0
                     , scotty
-                    , hedis
-                    , transformers
                     , text
                     , raw-strings-qq
                     , network-uri
                     , directory
                     , process
                     , bytestring
-                    , random
+                    , pureMD5
+                    , utf8-string
     hs-source-dirs:   src
     default-language: Haskell2010
 
 executable viddl
     main-is:          Main.hs
+    other-modules:    Templates.Index
+                    , Templates.Error
+                    , Helpers
+                    , YTDL
     ghc-options:      -Wall -O2
     build-depends:    base ^>=4.14.1.0
                     , scotty
-                    , hedis
                     , text
+                    , raw-strings-qq
+                    , network-uri
+                    , directory
+                    , process
+                    , bytestring
+                    , pureMD5
+                    , utf8-string
     hs-source-dirs:   src
     default-language: Haskell2010

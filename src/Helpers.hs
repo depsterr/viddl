@@ -1,10 +1,12 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Helpers where
 
 import YTDL
 import qualified Data.Text.Lazy as TL
 import Network.URI (parseURI)
 
-getRes :: String -> Maybe Resolution
+getRes :: TL.Text -> Maybe Resolution
 getRes ("144p")  = Just P144
 getRes ("240p")  = Just P240
 getRes ("360p")  = Just P360
@@ -16,7 +18,7 @@ getRes ("audio") = Just Audio
 getRes _         = Nothing
 
 isRes :: TL.Text -> Bool
-isRes res = case getRes (TL.unpack res) of
+isRes res = case getRes res of
               (Just _) -> True
               _        -> False
 

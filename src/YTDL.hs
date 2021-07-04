@@ -21,7 +21,7 @@ data Resolution
 
 wrapResString :: String -> [String]
 wrapResString str = ["-f", concat ["bestvideo[ext=mp4,height<=", str,
-  "]+bestaudio[ext=m4a]/mp4[height<=", str, "]"]]
+  "]+bestaudio[ext=m4a]/mp4[height<=", str, "]"], "--merge-output-format", "mp4"]
 
 resToArgs :: Resolution -> [String]
 resToArgs (P144)  = wrapResString "144"
@@ -30,7 +30,7 @@ resToArgs (P360)  = wrapResString "360"
 resToArgs (P480)  = wrapResString "480"
 resToArgs (P720)  = wrapResString "720"
 resToArgs (P1080) = wrapResString "1080"
-resToArgs (PMAX)  = ["-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4"]
+resToArgs (PMAX)  = ["-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4", "--merge-output-format", "mp4"]
 resToArgs (Audio) = ["-x", "--audio-format", "mp3"]
 
 ytdl :: String -> Resolution -> IO (Either String FilePath)
@@ -55,13 +55,12 @@ ytdl url res = do
 
       createDirectoryIfMissing True dir
 
+      print (resToArgs res <> ["-o", fileName, url])
+
       ytdlProc <- createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url]))
-        { std_out = CreatePipe
-        , std_err = CreatePipe }
 
       case ytdlProc of
-        (_, _, Just herr, ph) -> do
-          err <- hGetContents herr
+        (_, _, _, ph) -> do
           exitCode <- waitForProcess ph
           case exitCode of
             ExitSuccess -> do
@@ -73,9 +72,9 @@ ytdl url res = do
                   _ <- forkIO $ threadDelay 300000000 >> removeDirectoryRecursive dir
                   pure (Right fileName)
                 else do 
-                  removeDirectoryRecursive dir
+                  -- removeDirectoryRecursive dir
                   pure (Left "An unknown error prevented the output file from being created")
 
-            (ExitFailure status) -> pure (Left (concat ["execution failed with status ", show status, ": ", err]))
+            (ExitFailure status) -> pure (Left ("execution failed with status " <> show status))
 
         _ -> pure (Left "Unable to create ytdlProcess for downloading video")

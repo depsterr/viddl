@@ -17,7 +17,7 @@ library
                     , Templates.Error
                     , YTDL
                     , Helpers
-    ghc-options:      -Wall -O2
+    ghc-options:      -Wall -O2 -threaded
     build-depends:    base ^>=4.14.1.0
                     , scotty
                     , text
@@ -37,7 +37,7 @@ executable viddl
                     , Templates.Error
                     , Helpers
                     , YTDL
-    ghc-options:      -Wall -O2
+    ghc-options:      -Wall -O2 -threaded
     build-depends:    base ^>=4.14.1.0
                     , scotty
                     , text

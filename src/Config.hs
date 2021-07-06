@@ -7,4 +7,4 @@ data ViddlConfig = ViddlConfig
   , dlDir   :: FilePath }
 
 defConfig :: IO ViddlConfig
-defConfig = getTemporaryDirectory >>= pure . ViddlConfig 3000 . (<> "viddl")
+defConfig = getTemporaryDirectory >>= pure . ViddlConfig 3000 . (<> "/viddl")

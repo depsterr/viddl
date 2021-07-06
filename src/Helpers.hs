@@ -4,7 +4,7 @@ module Helpers where
 
 import YTDL
 import qualified Data.Text.Lazy as TL
-import Network.URI (parseURI)
+import Network.URI
 
 getRes :: TL.Text -> Maybe Resolution
 getRes ("144p")  = Just P144
@@ -22,7 +22,13 @@ isRes res = case getRes res of
               (Just _) -> True
               _        -> False
 
+-- ssrf paranoia
+isOkPath :: String -> Bool
+isOkPath p = not $ isIPv4address p || isIPv6address p || p == "localhost"
+
 isURL :: TL.Text -> Bool
 isURL uri = case parseURI (TL.unpack uri) of
-              (Just _) -> True
-              _        -> False
+              (Just u) -> case uriAuthority u of
+                  (Just (URIAuth _ p _)) -> isOkPath p
+                  _                        -> False
+              _          -> False

@@ -27,7 +27,6 @@ downloadAction = do
             setHeader "content-type" "video/mp4"
             file filePath
           (Left err) -> html $ errorPage (TL.pack err)
-        -- liftIO $ ytdlClean ident
       else
         html $ errorPage "Invalid input!"
 

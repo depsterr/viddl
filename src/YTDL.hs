@@ -1,12 +1,15 @@
 module YTDL (Resolution(..), ytdl) where
 
+import Config
+
+import Control.Monad.Trans.Reader
+import Control.Monad.Trans.Class
 import Control.Concurrent (forkIO, threadDelay)
 import Data.Digest.Pure.MD5
 import qualified Data.ByteString.Lazy.UTF8 as BCU
 import System.Directory
 import System.Exit
 import System.Process
-import System.IO
 
 data Resolution
   = P144
@@ -33,43 +36,41 @@ resToArgs (P1080) = wrapResString "1080"
 resToArgs (PMAX)  = ["-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4", "--merge-output-format", "mp4"]
 resToArgs (Audio) = ["-x", "--audio-format", "mp3"]
 
-ytdl :: String -> Resolution -> IO (Either String FilePath)
+ytdl :: String -> Resolution -> ReaderT ViddlConfig IO (Either String FilePath)
 ytdl url res = do
+  cfg <- ask
+
   let ext = case res of { Audio -> ".mp3"; _ -> ".mp4" }
 
   let ident = show . md5 . BCU.fromString $ url <> show res
 
-  -- todo: config for path
-  tmpdir <- getTemporaryDirectory
-  let dir = concat [tmpdir, "/viddl/", ident]
+  let dir = concat [dlDir cfg, "/", ident]
   let fileName = concat [dir, "/", ident, ext]
 
-  -- todo: implement file locking for deleting and uploading file
-  processed <- doesFileExist fileName
+  processed <- lift $ doesFileExist fileName
   if processed
     then do
-      putStrLn $ "Returning existing ident " <> ident
+      lift $ putStrLn $ "Returning existing ident " <> ident
       pure (Right fileName)
     else do
-      putStrLn $ "Processing new ident " <> ident
+      lift $ putStrLn $ "Processing new ident " <> ident
 
-      createDirectoryIfMissing True dir
+      lift $ createDirectoryIfMissing True dir
 
-      print (resToArgs res <> ["-o", fileName, url])
+      lift $ print (resToArgs res <> ["-o", fileName, url])
 
-      ytdlProc <- createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url]))
+      ytdlProc <- lift $ createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url]))
 
       case ytdlProc of
         (_, _, _, ph) -> do
-          exitCode <- waitForProcess ph
+          exitCode <- lift $ waitForProcess ph
           case exitCode of
             ExitSuccess -> do
-              exists <- doesFileExist fileName
+              exists <- lift $ doesFileExist fileName
               if exists
                 then do
                   -- wait 5 minutes and then delete the directory
-                  -- todo: implement file locking for deleting and uploading file
-                  _ <- forkIO $ threadDelay 300000000 >> removeDirectoryRecursive dir
+                  _ <- lift $ forkIO $ threadDelay 300000000 >> removeDirectoryRecursive dir
                   pure (Right fileName)
                 else do 
                   -- removeDirectoryRecursive dir

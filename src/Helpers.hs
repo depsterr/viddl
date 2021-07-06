@@ -3,8 +3,26 @@
 module Helpers where
 
 import YTDL
+import Config
+
+import Text.Read (readMaybe)
 import qualified Data.Text.Lazy as TL
 import Network.URI
+import System.Exit
+
+parseArgs :: ViddlConfig -> [String] -> IO ViddlConfig
+parseArgs _ ("-h":_) = exitHelp
+parseArgs _ ("--help":_) = exitHelp
+parseArgs cfg@(ViddlConfig _ d) ("-p":p':xs) = case (readMaybe p' :: Maybe Int) of
+  (Just p) -> parseArgs (ViddlConfig p d) xs
+  Nothing  -> parseArgs cfg (p':xs)
+parseArgs (ViddlConfig p _) ("-d":d:xs) = parseArgs (ViddlConfig p d) xs
+parseArgs cfg (_:xs) = parseArgs cfg xs
+parseArgs cfg [] = pure cfg
+
+
+exitHelp :: IO a
+exitHelp = putStrLn "viddl [-p port] [-d dir]" >> exitSuccess
 
 getRes :: TL.Text -> Maybe Resolution
 getRes ("144p")  = Just P144

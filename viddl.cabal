@@ -17,6 +17,7 @@ library
                     , Templates.Error
                     , YTDL
                     , Helpers
+                    , Config
     ghc-options:      -Wall -O2 -threaded
     build-depends:    base ^>=4.14.1.0
                     , scotty
@@ -28,6 +29,7 @@ library
                     , bytestring
                     , pureMD5
                     , utf8-string
+                    , transformers
     hs-source-dirs:   src
     default-language: Haskell2010
 
@@ -37,6 +39,7 @@ executable viddl
                     , Templates.Error
                     , Helpers
                     , YTDL
+                    , Config
     ghc-options:      -Wall -O2 -threaded
     build-depends:    base ^>=4.14.1.0
                     , scotty
@@ -48,5 +51,6 @@ executable viddl
                     , bytestring
                     , pureMD5
                     , utf8-string
+                    , transformers
     hs-source-dirs:   src
     default-language: Haskell2010

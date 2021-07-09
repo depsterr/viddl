@@ -71,9 +71,7 @@ ytdl url res = ReaderT $ \cfg -> do
                   _ <- forkIO $ threadDelay 300000000 >> removeDirectoryRecursive dir
                   pure (Right fileName)
                 else do 
-                  -- removeDirectoryRecursive dir
+                  removeDirectoryRecursive dir
                   pure (Left "An unknown error prevented the output file from being created")
 
             (ExitFailure status) -> pure (Left ("execution failed with status " <> show status))
-
-        _ -> pure (Left "Unable to create ytdlProcess for downloading video")

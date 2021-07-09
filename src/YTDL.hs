@@ -35,6 +35,9 @@ resToArgs (P1080) = wrapResString "1080"
 resToArgs (PMAX)  = ["-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4", "--merge-output-format", "mp4"]
 resToArgs (Audio) = ["-x", "--audio-format", "mp3"]
 
+extraYtdlArgs :: [String]
+extraYtdlArgs = ["--no-playlist"]
+
 ytdl :: String -> Resolution -> ReaderT ViddlConfig IO (Either String FilePath)
 ytdl url res = ReaderT $ \cfg -> do
 
@@ -57,7 +60,7 @@ ytdl url res = ReaderT $ \cfg -> do
 
       print (resToArgs res <> ["-o", fileName, url])
 
-      ytdlProc <- createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url]))
+      ytdlProc <- createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url] <> extraYtdlArgs))
 
       case ytdlProc of
         (_, _, _, ph) -> do

@@ -5,6 +5,7 @@ module Templates.Error (errorPage) where
 
 import qualified Data.Text.Lazy as TL
 import Text.RawString.QQ
+import Text.HTML.SanitizeXSS
 
 errorPage :: TL.Text -> TL.Text
 errorPage msg = [r|
@@ -17,7 +18,7 @@ errorPage msg = [r|
 <body>
 	<center>
 		<h1>viddl</h1>
-		<p>|] <> msg <> [r|</p>
+		<p>|] <> (TL.fromStrict (sanitize (TL.toStrict msg))) <> [r|</p>
 		<hr>
 		<p>viddl is free <a href="https://github.com/depsterr/viddl">open source</a> software and is powered by <a href="https://yt-dl.org/">youtube-dl</a>.</p>
 	</center>

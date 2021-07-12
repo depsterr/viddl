@@ -9,6 +9,7 @@ import qualified Data.ByteString.Lazy.UTF8 as BCU
 import System.Directory
 import System.Exit
 import System.Process
+import System.IO
 
 data Resolution
   = P144
@@ -61,9 +62,13 @@ ytdl url res = ReaderT $ \cfg -> do
       print (resToArgs res <> ["-o", fileName, url])
 
       ytdlProc <- createProcess (proc "youtube-dl" (resToArgs res <> ["-o", fileName, url] <> extraYtdlArgs))
+        { std_out = CreatePipe
+        , std_err = CreatePipe }
 
       case ytdlProc of
-        (_, _, _, ph) -> do
+        (_, Just hout, Just herr, ph) -> do
+          err <- hGetContents herr
+          out <- hGetContents hout
           exitCode <- waitForProcess ph
           case exitCode of
             ExitSuccess -> do
@@ -77,4 +82,11 @@ ytdl url res = ReaderT $ \cfg -> do
                   removeDirectoryRecursive dir
                   pure (Left "An unknown error prevented the output file from being created")
 
-            (ExitFailure status) -> pure (Left ("execution failed with status " <> show status))
+            (ExitFailure status) -> pure (Left (concat ["execution failed with status '"
+              , show status
+              , "' <pre><code>"
+              , out, err
+              , "' </pre></code>"
+              ]))
+
+        _ -> pure (Left "Unable to spawn process for downloading")
